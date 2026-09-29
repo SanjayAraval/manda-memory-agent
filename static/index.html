@@ -2,106 +2,667 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>M&amp;A Memory Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>M&amp;A Integration Memory Agent</title>
 <style>
+  :root {
+    --bg: #0b0d12;
+    --panel: #12151c;
+    --panel-2: #171b24;
+    --border: #262b36;
+    --text: #e8eaf0;
+    --muted: #8b93a3;
+    --accent: #7c9dff;
+    --blue: #5b8def;
+    --orange: #e0973a;
+    --red: #e35c5c;
+    --grey: #6b7280;
+  }
+
+  * { box-sizing: border-box; }
+
   body {
-    font-family: system-ui, sans-serif;
-    max-width: 700px;
-    margin: 40px auto;
-    padding: 0 20px;
-    color: #222;
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 40px 24px 80px;
   }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
   h1 {
-    font-size: 1.4rem;
+    font-size: 1.9rem;
+    margin: 0 0 8px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  /* Stat row */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin: 32px 0;
+  }
+
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 14px;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+
+  .stat-card.text-only .stat-number {
+    font-size: 1.15rem;
+  }
+
+  .stat-label {
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 6px;
+  }
+
+  /* Timeline */
+  section.block {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 24px;
+  }
+
+  .block h2 {
+    font-size: 1rem;
+    margin: 0 0 4px;
+    color: var(--text);
+  }
+
+  .block .hint {
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin: 0 0 16px;
+  }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+  }
+
+  .week-col {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 8px 14px;
+    min-height: 120px;
+  }
+
+  .week-label {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.1s ease, border-color 0.1s ease;
+    flex-shrink: 0;
+  }
+
+  .dot:hover, .dot.active {
+    transform: scale(1.25);
+    border-color: #fff;
+  }
+
+  .dot.blue { background: var(--blue); }
+  .dot.orange { background: var(--orange); }
+  .dot.red { background: var(--red); }
+  .dot.grey { background: var(--grey); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 16px;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .note-detail {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left-width: 4px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    display: none;
+  }
+
+  .note-detail.visible {
+    display: block;
+  }
+
+  .note-detail .note-meta {
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  /* Demo cards */
+  .demo-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .demo-card {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    text-align: left;
+    cursor: pointer;
+    color: var(--text);
+    font-family: inherit;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .demo-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .demo-card:disabled {
+    opacity: 0.6;
+    cursor: default;
+    transform: none;
+  }
+
+  .demo-card .card-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+
+  .demo-card .card-desc {
+    color: var(--muted);
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+
+  .demo-card.conflict .card-title { color: var(--red); }
+  .demo-card.no-memory .card-title { color: var(--grey); }
+  .demo-card.with-memory .card-title { color: var(--blue); }
+
+  /* Result panel */
+  #result-panel {
+    display: none;
+    margin-top: 22px;
+    padding: 20px 22px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+
+  #result-panel.visible {
+    display: block;
+  }
+
+  #result-panel.conflict {
+    border-left: 5px solid var(--red);
+  }
+
+  #result-panel.plain {
+    border-left: 5px solid var(--border);
+  }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+  }
+
+  .result-header.conflict-label {
+    color: var(--red);
+    letter-spacing: 0.03em;
+  }
+
+  .result-body {
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  /* Collapsible free-text section */
+  details {
+    margin-top: 8px;
+  }
+
+  summary {
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 6px 0;
+    user-select: none;
+  }
+
+  summary:hover {
+    color: var(--text);
+  }
+
+  .free-form {
+    margin-top: 14px;
+  }
+
   label {
     display: block;
-    margin-top: 16px;
+    margin-top: 12px;
     margin-bottom: 4px;
-    font-weight: bold;
+    font-size: 0.8rem;
+    color: var(--muted);
   }
-  select, textarea, button {
-    font-size: 1rem;
+
+  select, textarea, button.primary {
+    font-size: 0.9rem;
     font-family: inherit;
     width: 100%;
     box-sizing: border-box;
-    padding: 8px;
+    padding: 10px;
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
   }
+
   textarea {
-    height: 80px;
+    height: 70px;
     resize: vertical;
   }
-  button {
-    margin-top: 16px;
-    padding: 10px;
+
+  button.primary {
+    margin-top: 12px;
     cursor: pointer;
+    background: var(--accent);
+    color: #0b0d12;
+    font-weight: 600;
+    border: none;
   }
-  #answer-box {
-    margin-top: 24px;
-    padding: 16px;
-    border: 1px solid #ccc;
-    background: #f7f7f7;
-    white-space: pre-wrap;
-    min-height: 40px;
+
+  button.primary:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  @media (max-width: 720px) {
+    .stats, .demo-cards { grid-template-columns: 1fr 1fr; }
+    .timeline { grid-template-columns: repeat(3, 1fr); }
   }
 </style>
 </head>
 <body>
 
-<h1>M&amp;A Integration Memory Demo</h1>
+<div class="wrap">
 
-<label for="bank_id">Bank</label>
-<select id="bank_id">
-  <option value="empty-demo-bank">empty-demo-bank (no memory)</option>
-  <option value="manda-demo" selected>manda-demo (19 meeting notes loaded)</option>
-</select>
+  <header>
+    <h1>M&amp;A Integration Memory Agent</h1>
+    <p class="subtitle">Catches contradictions in merger decisions using Hindsight memory.</p>
+  </header>
 
-<label for="query">Question</label>
-<textarea id="query" placeholder="e.g. What's our cloud infrastructure decision for the integration?"></textarea>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-number">19</div>
+      <div class="stat-label">Memories Retained</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">6</div>
+      <div class="stat-label">Week Timeline</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">2</div>
+      <div class="stat-label">Open Conflicts</div>
+    </div>
+    <div class="stat-card text-only">
+      <div class="stat-number">Powered by Hindsight</div>
+      <div class="stat-label">&nbsp;</div>
+    </div>
+  </div>
 
-<button id="submit">Ask</button>
+  <section class="block">
+    <h2>Integration Timeline</h2>
+    <p class="hint">Every meeting note retained into memory, plotted by week. Click a dot to read it.</p>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--blue)"></span> Infra decision</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--orange)"></span> HR policy</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--red)"></span> Open conflict</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--grey)"></span> Tooling / systems</div>
+    </div>
+    <div class="note-detail" id="note-detail"></div>
+  </section>
 
-<div id="answer-box">Answer will appear here.</div>
+  <section class="block">
+    <h2>Try it</h2>
+    <p class="hint">Click a card to run a live query against the memory agent.</p>
+    <div class="demo-cards">
+      <button class="demo-card no-memory" id="card-no-memory">
+        <div class="card-title">Ask Without Memory</div>
+        <div class="card-desc">Queries an empty bank with no context, to show the baseline answer without any retained history.</div>
+      </button>
+      <button class="demo-card with-memory" id="card-with-memory">
+        <div class="card-title">Ask With Memory</div>
+        <div class="card-desc">Same question, answered using the full 19-note integration history retained in memory.</div>
+      </button>
+      <button class="demo-card conflict" id="card-conflict">
+        <div class="card-title">Check for Conflicts</div>
+        <div class="card-desc">Simulates a team lead proposing to keep AWS, and checks whether that contradicts a prior decision.</div>
+      </button>
+    </div>
+
+    <div id="result-panel">
+      <div class="result-header" id="result-header"></div>
+      <div class="result-body" id="result-body"></div>
+    </div>
+
+    <details>
+      <summary>Ask your own question</summary>
+      <div class="free-form">
+        <label for="bank_id">Bank</label>
+        <select id="bank_id">
+          <option value="empty-demo-bank">empty-demo-bank (no memory)</option>
+          <option value="manda-demo" selected>manda-demo (19 meeting notes loaded)</option>
+        </select>
+
+        <label for="query">Question</label>
+        <textarea id="query" placeholder="e.g. What's our cloud infrastructure decision for the integration?"></textarea>
+
+        <button class="primary" id="free-submit">Ask</button>
+      </div>
+    </details>
+  </section>
+
+</div>
 
 <script>
-  const submitBtn = document.getElementById("submit");
-  const answerBox = document.getElementById("answer-box");
+  const CONTEXT_COLOR = {
+    "infra decision": "blue",
+    "HR policy": "orange",
+    "open conflict": "red",
+    "tooling migration": "grey",
+    "systems integration": "grey",
+  };
 
-  async function submitQuery() {
-    const bank_id = document.getElementById("bank_id").value;
-    const query = document.getElementById("query").value.trim();
+  const resultPanel = document.getElementById("result-panel");
+  const resultHeader = document.getElementById("result-header");
+  const resultBody = document.getElementById("result-body");
 
-    if (!query) {
-      answerBox.textContent = "Please enter a question.";
-      return;
+  function showResult({ kind, text }) {
+    resultPanel.classList.remove("plain", "conflict");
+    resultHeader.classList.remove("conflict-label");
+
+    if (kind === "conflict") {
+      resultPanel.classList.add("conflict");
+      resultHeader.classList.add("conflict-label");
+      resultHeader.textContent = "⚠ CONFLICT DETECTED";
+    } else if (kind === "no-memory") {
+      resultPanel.classList.add("plain");
+      resultHeader.textContent = "No memory context";
+    } else if (kind === "with-memory") {
+      resultPanel.classList.add("plain");
+      resultHeader.textContent = "Answer from memory";
+    } else {
+      resultPanel.classList.add("plain");
+      resultHeader.textContent = "Answer";
     }
 
-    submitBtn.disabled = true;
-    answerBox.textContent = "Thinking...";
+    resultBody.innerHTML = renderMarkdown(text);
+    resultPanel.classList.add("visible");
+    resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 
-    try {
-      const res = await fetch("/reflect", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bank_id, query }),
-      });
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
 
-      if (!res.ok) {
-        const errText = await res.text();
-        answerBox.textContent = "Error: " + errText;
-        return;
+  function renderInline(str) {
+    return escapeHtml(str)
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/(?<!\*)\*(?!\*)(.+?)\*(?!\*)/g, "<em>$1</em>");
+  }
+
+  function renderMarkdown(text) {
+    const lines = text.split("\n");
+    let html = "";
+    let listOpen = false;
+
+    const closeList = () => {
+      if (listOpen) {
+        html += "</ul>";
+        listOpen = false;
+      }
+    };
+
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+
+      if (!line) {
+        closeList();
+        continue;
       }
 
-      const data = await res.json();
-      answerBox.textContent = data.answer;
+      const heading = line.match(/^(#{1,6})\s+(.*)$/);
+      if (heading) {
+        closeList();
+        const level = Math.min(heading[1].length + 2, 6);
+        html += "<h" + level + ' style="margin:14px 0 6px;font-size:1.02rem;">' + renderInline(heading[2]) + "</h" + level + ">";
+        continue;
+      }
+
+      const bullet = line.match(/^[*-]\s+(.*)$/);
+      if (bullet) {
+        if (!listOpen) {
+          html += '<ul style="margin:6px 0;padding-left:20px;">';
+          listOpen = true;
+        }
+        html += "<li>" + renderInline(bullet[1]) + "</li>";
+        continue;
+      }
+
+      closeList();
+      html += "<p style=\"margin:8px 0;\">" + renderInline(line) + "</p>";
+    }
+
+    closeList();
+    return html;
+  }
+
+  async function runReflect(bank_id, query) {
+    const res = await fetch("/reflect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bank_id, query }),
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(errText);
+    }
+    const data = await res.json();
+    return data.answer;
+  }
+
+  function wireDemoCard(buttonId, { bank_id, query, kind }) {
+    const btn = document.getElementById(buttonId);
+    btn.addEventListener("click", async () => {
+      const allCards = document.querySelectorAll(".demo-card");
+      allCards.forEach((c) => (c.disabled = true));
+      showResult({ kind, text: "Thinking..." });
+      try {
+        const answer = await runReflect(bank_id, query);
+        showResult({ kind, text: answer });
+      } catch (err) {
+        showResult({ kind, text: "Error: " + err.message });
+      } finally {
+        allCards.forEach((c) => (c.disabled = false));
+      }
+    });
+  }
+
+  wireDemoCard("card-no-memory", {
+    bank_id: "empty-demo-bank",
+    query: "What's our cloud infrastructure decision for the integration?",
+    kind: "no-memory",
+  });
+
+  wireDemoCard("card-with-memory", {
+    bank_id: "manda-demo",
+    query: "What's our cloud infrastructure decision for the integration?",
+    kind: "with-memory",
+  });
+
+  wireDemoCard("card-conflict", {
+    bank_id: "manda-demo",
+    query:
+      "A team lead just proposed keeping their AWS pipeline for Q1 since it's already working. Does this conflict with any prior decision?",
+    kind: "conflict",
+  });
+
+  // Free-text section
+  const freeSubmit = document.getElementById("free-submit");
+  freeSubmit.addEventListener("click", async () => {
+    const bank_id = document.getElementById("bank_id").value;
+    const query = document.getElementById("query").value.trim();
+    if (!query) return;
+
+    freeSubmit.disabled = true;
+    showResult({ kind: "plain", text: "Thinking..." });
+    try {
+      const answer = await runReflect(bank_id, query);
+      showResult({ kind: "plain", text: answer });
     } catch (err) {
-      answerBox.textContent = "Error: " + err;
+      showResult({ kind: "plain", text: "Error: " + err.message });
     } finally {
-      submitBtn.disabled = false;
+      freeSubmit.disabled = false;
+    }
+  });
+
+  // Timeline
+  const timelineEl = document.getElementById("timeline");
+  const noteDetail = document.getElementById("note-detail");
+  let activeDot = null;
+
+  function renderTimeline(notes) {
+    timelineEl.innerHTML = "";
+    for (let week = 1; week <= 6; week++) {
+      const col = document.createElement("div");
+      col.className = "week-col";
+
+      const label = document.createElement("div");
+      label.className = "week-label";
+      label.textContent = "Week " + week;
+      col.appendChild(label);
+
+      const dotsWrap = document.createElement("div");
+      dotsWrap.className = "dots";
+
+      notes
+        .filter((n) => n.week === week)
+        .forEach((note) => {
+          const dot = document.createElement("div");
+          dot.className = "dot " + (CONTEXT_COLOR[note.context] || "grey");
+          dot.title = note.context;
+          dot.addEventListener("click", () => {
+            if (activeDot) activeDot.classList.remove("active");
+            dot.classList.add("active");
+            activeDot = dot;
+
+            const colorClass = CONTEXT_COLOR[note.context] || "grey";
+            noteDetail.style.borderLeftColor = getComputedStyle(document.documentElement)
+              .getPropertyValue("--" + colorClass);
+            noteDetail.innerHTML =
+              '<div class="note-meta">Week ' + note.week + " &middot; " + note.context + "</div>" +
+              note.content;
+            noteDetail.classList.add("visible");
+            noteDetail.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          });
+          dotsWrap.appendChild(dot);
+        });
+
+      col.appendChild(dotsWrap);
+      timelineEl.appendChild(col);
     }
   }
 
-  submitBtn.addEventListener("click", submitQuery);
+  async function loadTimeline() {
+    try {
+      const res = await fetch("/timeline");
+      const notes = await res.json();
+      renderTimeline(notes);
+    } catch (err) {
+      timelineEl.innerHTML = '<p style="color: var(--muted)">Could not load timeline.</p>';
+    }
+  }
+
+  loadTimeline();
 </script>
 
 </body>
