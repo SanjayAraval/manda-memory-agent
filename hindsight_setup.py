@@ -1,0 +1,13 @@
+import os
+
+from dotenv import load_dotenv
+from hindsight_client import Hindsight
+
+load_dotenv()
+
+
+def get_client() -> Hindsight:
+    return Hindsight(
+        base_url=os.environ["HINDSIGHT_BASE_URL"],
+        api_key=os.environ["HINDSIGHT_API_KEY"],
+    )

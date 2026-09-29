@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>M&amp;A Memory Demo</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 0 20px;
+    color: #222;
+  }
+  h1 {
+    font-size: 1.4rem;
+  }
+  label {
+    display: block;
+    margin-top: 16px;
+    margin-bottom: 4px;
+    font-weight: bold;
+  }
+  select, textarea, button {
+    font-size: 1rem;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+  }
+  textarea {
+    height: 80px;
+    resize: vertical;
+  }
+  button {
+    margin-top: 16px;
+    padding: 10px;
+    cursor: pointer;
+  }
+  #answer-box {
+    margin-top: 24px;
+    padding: 16px;
+    border: 1px solid #ccc;
+    background: #f7f7f7;
+    white-space: pre-wrap;
+    min-height: 40px;
+  }
+</style>
+</head>
+<body>
+
+<h1>M&amp;A Integration Memory Demo</h1>
+
+<label for="bank_id">Bank</label>
+<select id="bank_id">
+  <option value="empty-demo-bank">empty-demo-bank (no memory)</option>
+  <option value="manda-demo" selected>manda-demo (19 meeting notes loaded)</option>
+</select>
+
+<label for="query">Question</label>
+<textarea id="query" placeholder="e.g. What's our cloud infrastructure decision for the integration?"></textarea>
+
+<button id="submit">Ask</button>
+
+<div id="answer-box">Answer will appear here.</div>
+
+<script>
+  const submitBtn = document.getElementById("submit");
+  const answerBox = document.getElementById("answer-box");
+
+  async function submitQuery() {
+    const bank_id = document.getElementById("bank_id").value;
+    const query = document.getElementById("query").value.trim();
+
+    if (!query) {
+      answerBox.textContent = "Please enter a question.";
+      return;
+    }
+
+    submitBtn.disabled = true;
+    answerBox.textContent = "Thinking...";
+
+    try {
+      const res = await fetch("/reflect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bank_id, query }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        answerBox.textContent = "Error: " + errText;
+        return;
+      }
+
+      const data = await res.json();
+      answerBox.textContent = data.answer;
+    } catch (err) {
+      answerBox.textContent = "Error: " + err;
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  submitBtn.addEventListener("click", submitQuery);
+</script>
+
+</body>
+</html>
